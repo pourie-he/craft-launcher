@@ -40,8 +40,17 @@ pub struct Tokens {
     pub dark: bool,
     /// Page and card surface.
     pub bg: Color32,
-    /// Badges, wells and row hovers.
+    /// Header and footer chrome.
+    pub chrome: Color32,
+    /// Drawers and dialogs.
+    pub panel: Color32,
+    /// Raised controls and notices.
+    pub raised: Color32,
+    /// Badges, wells and text fields.
     pub sunken: Color32,
+    /// Interactive hover and pressed surfaces.
+    pub hover: Color32,
+    pub pressed: Color32,
     /// Body text.
     pub ink: Color32,
     /// Headings.
@@ -58,6 +67,11 @@ pub struct Tokens {
     pub accent: Color32,
     /// The brand blue, for text and icons.
     pub accent_ink: Color32,
+    /// Foreground on a blue filled control.
+    pub on_accent: Color32,
+    /// Selected text and rows, distinct from the brighter brand accent.
+    pub selection: Color32,
+    pub selection_ink: Color32,
     /// Primary buttons and hover inversion.
     pub invert_bg: Color32,
     pub invert_fg: Color32,
@@ -79,16 +93,25 @@ const fn hex(rgb: u32) -> Color32 {
 impl Tokens {
     pub const DARK: Self = Self {
         dark: true,
+        // ArtCraft's shared standard-dark role palette.
         bg: hex(0x121316),
+        chrome: hex(0x0a0a0c),
+        panel: hex(0x101014),
+        raised: hex(0x1e1f22),
         sunken: hex(0x060607),
+        hover: hex(0x323337),
+        pressed: hex(0x414246),
         ink: hex(0xf2f1ee),
         ink_strong: hex(0xffffff),
-        muted: ink_alpha(0xf2f1ee, 153),
-        faint: ink_alpha(0xf2f1ee, 97),
-        line: ink_alpha(0xf2f1ee, 38),
-        line_strong: ink_alpha(0xf2f1ee, 102),
+        muted: hex(0xa6a6a8),
+        faint: hex(0x717176),
+        line: hex(0x36373a),
+        line_strong: hex(0x77787c),
         accent: hex(0x2d81ff),
         accent_ink: hex(0x74aaff),
+        on_accent: hex(0x060607),
+        selection: hex(0x203b65),
+        selection_ink: hex(0xf2f1ee),
         invert_bg: hex(0xffffff),
         invert_fg: hex(0x0b0b0c),
         // PdfCraft's and LightCraft's inks, so status colours come from the site's palette.
@@ -100,7 +123,12 @@ impl Tokens {
     pub const LIGHT: Self = Self {
         dark: false,
         bg: hex(0xf2f1ee),
+        chrome: hex(0xf2f1ee),
+        panel: hex(0xf2f1ee),
+        raised: hex(0xf2f1ee),
         sunken: hex(0xe9e8e4),
+        hover: hex(0xe9e8e4),
+        pressed: hex(0xe9e8e4),
         ink: hex(0x101014),
         ink_strong: hex(0x000000),
         muted: ink_alpha(0x101014, 158),
@@ -109,6 +137,9 @@ impl Tokens {
         line_strong: ink_alpha(0x101014, 102),
         accent: hex(0x2d81ff),
         accent_ink: hex(0x1659c4),
+        on_accent: hex(0xffffff),
+        selection: hex(0x2d81ff),
+        selection_ink: hex(0xffffff),
         invert_bg: hex(0x101014),
         invert_fg: hex(0xf2f1ee),
         good: hex(0x0a7563),
@@ -181,16 +212,16 @@ fn visuals(t: &Tokens) -> Visuals {
     v.popup_shadow = shadow(t);
     v.override_text_color = Some(t.ink);
     v.hyperlink_color = t.accent_ink;
-    v.selection.bg_fill = t.accent;
-    v.selection.stroke = Stroke::new(1.0, Color32::WHITE);
+    v.selection.bg_fill = t.selection;
+    v.selection.stroke = Stroke::new(1.0, t.selection_ink);
     v.warn_fg_color = t.warn;
     v.error_fg_color = t.bad;
     for (w, fill, stroke, fg) in [
         (&mut v.widgets.noninteractive, t.bg, t.line, t.muted),
         (&mut v.widgets.inactive, t.bg, t.line, t.ink),
-        (&mut v.widgets.hovered, t.sunken, t.line_strong, t.ink_strong),
-        (&mut v.widgets.active, t.sunken, t.line_strong, t.ink_strong),
-        (&mut v.widgets.open, t.sunken, t.line_strong, t.ink_strong),
+        (&mut v.widgets.hovered, t.hover, t.line_strong, t.ink_strong),
+        (&mut v.widgets.active, t.pressed, t.line_strong, t.ink_strong),
+        (&mut v.widgets.open, t.pressed, t.line_strong, t.ink_strong),
     ] {
         w.bg_fill = fill;
         w.weak_bg_fill = fill;
@@ -351,4 +382,30 @@ pub fn cjk_font_loaded(lang: Lang) -> bool {
 /// Can the CJK language `lang` be drawn? Loads the system font on the first call ([`cjk_font`]).
 pub fn cjk_font_available(lang: Lang) -> bool {
     cjk_font(lang).is_some()
+}
+
+#[cfg(test)]
+mod dark_theme_tests {
+    use super::*;
+
+    #[test]
+    fn standard_dark_roles_reach_egui_without_changing_light_preference() {
+        let ctx = egui::Context::default();
+        apply(&ctx, ThemeChoice::Dark);
+        assert_eq!(ctx.theme(), egui::Theme::Dark);
+        let dark = ctx.style_of(egui::Theme::Dark);
+        assert_eq!(dark.visuals.panel_fill, hex(0x121316));
+        assert_eq!(dark.visuals.extreme_bg_color, hex(0x060607));
+        assert_eq!(dark.visuals.widgets.hovered.bg_fill, hex(0x323337));
+        assert_eq!(dark.visuals.widgets.active.bg_fill, hex(0x414246));
+        assert_eq!(dark.visuals.selection.bg_fill, hex(0x203b65));
+        assert_eq!(dark.visuals.selection.stroke.color, hex(0xf2f1ee));
+
+        apply(&ctx, ThemeChoice::Light);
+        assert_eq!(ctx.theme(), egui::Theme::Light);
+        let light = ctx.style_of(egui::Theme::Light);
+        assert_eq!(light.visuals.panel_fill, hex(0xf2f1ee));
+        assert_eq!(light.visuals.widgets.hovered.bg_fill, hex(0xe9e8e4));
+        assert_eq!(light.visuals.selection.bg_fill, hex(0x2d81ff));
+    }
 }
