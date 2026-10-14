@@ -4,7 +4,7 @@
 
 use std::sync::Arc;
 
-use craft_ui::theme::SuiteDarkPalette;
+use craft_ui::theme::SuitePalette;
 use egui::epaint::text::VariationCoords;
 use egui::{Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId, FontTweak, Stroke, TextStyle, Visuals};
 use serde::{Deserialize, Serialize};
@@ -95,26 +95,26 @@ impl Tokens {
     pub const DARK: Self = Self {
         dark: true,
         // ArtCraft's shared standard-dark role palette.
-        bg: SuiteDarkPalette::ARTCRAFT.window,
-        chrome: SuiteDarkPalette::ARTCRAFT.chrome,
-        panel: SuiteDarkPalette::ARTCRAFT.panel,
-        raised: SuiteDarkPalette::ARTCRAFT.raised,
-        sunken: SuiteDarkPalette::ARTCRAFT.input,
-        hover: SuiteDarkPalette::ARTCRAFT.hover,
-        pressed: SuiteDarkPalette::ARTCRAFT.pressed,
-        ink: SuiteDarkPalette::ARTCRAFT.text,
-        ink_strong: SuiteDarkPalette::ARTCRAFT.text_strong,
-        muted: SuiteDarkPalette::ARTCRAFT.text_secondary,
-        faint: SuiteDarkPalette::ARTCRAFT.text_disabled,
-        line: SuiteDarkPalette::ARTCRAFT.border,
-        line_strong: SuiteDarkPalette::ARTCRAFT.border_strong,
-        accent: SuiteDarkPalette::ARTCRAFT.accent,
-        accent_ink: SuiteDarkPalette::ARTCRAFT.focus,
-        on_accent: SuiteDarkPalette::ARTCRAFT.on_accent,
-        selection: SuiteDarkPalette::ARTCRAFT.selection,
-        selection_ink: SuiteDarkPalette::ARTCRAFT.selection_text,
-        invert_bg: SuiteDarkPalette::ARTCRAFT.primary,
-        invert_fg: SuiteDarkPalette::ARTCRAFT.on_primary,
+        bg: SuitePalette::ARTCRAFT_DARK.window,
+        chrome: SuitePalette::ARTCRAFT_DARK.chrome,
+        panel: SuitePalette::ARTCRAFT_DARK.panel,
+        raised: SuitePalette::ARTCRAFT_DARK.raised,
+        sunken: SuitePalette::ARTCRAFT_DARK.input,
+        hover: SuitePalette::ARTCRAFT_DARK.hover,
+        pressed: SuitePalette::ARTCRAFT_DARK.pressed,
+        ink: SuitePalette::ARTCRAFT_DARK.text,
+        ink_strong: SuitePalette::ARTCRAFT_DARK.text_strong,
+        muted: SuitePalette::ARTCRAFT_DARK.text_secondary,
+        faint: SuitePalette::ARTCRAFT_DARK.text_disabled,
+        line: SuitePalette::ARTCRAFT_DARK.border,
+        line_strong: SuitePalette::ARTCRAFT_DARK.border_strong,
+        accent: SuitePalette::ARTCRAFT_DARK.accent,
+        accent_ink: SuitePalette::ARTCRAFT_DARK.focus,
+        on_accent: SuitePalette::ARTCRAFT_DARK.on_accent,
+        selection: SuitePalette::ARTCRAFT_DARK.selection,
+        selection_ink: SuitePalette::ARTCRAFT_DARK.selection_text,
+        invert_bg: SuitePalette::ARTCRAFT_DARK.primary,
+        invert_fg: SuitePalette::ARTCRAFT_DARK.on_primary,
         // PdfCraft's and LightCraft's inks, so status colours come from the site's palette.
         good: hex(0x3fd6b8),
         warn: hex(0xffc14d),
@@ -391,7 +391,7 @@ mod dark_theme_tests {
 
     #[test]
     fn shared_dark_roles_preserve_inverted_buttons_status_and_light_colors() {
-        let roles = SuiteDarkPalette::ARTCRAFT;
+        let roles = SuitePalette::ARTCRAFT_DARK;
         let dark = Tokens::DARK;
         assert_eq!(dark.bg, roles.window);
         assert_eq!(dark.chrome, roles.chrome);
