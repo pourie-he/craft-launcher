@@ -11,6 +11,7 @@ publish = false
 workspace = true
 
 [dependencies]
+craft-ui = { git = "https://github.com/storytold/craft-libs", rev = "5d9c5780debff884922aa2a3fab87ba2fc61ac30" }
 artcraft-launcher-core = { workspace = true }
 egui = { workspace = true }
 egui_extras = { workspace = true, features = ["image", "svg"] }

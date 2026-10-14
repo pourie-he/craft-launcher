@@ -4,6 +4,7 @@
 
 use std::sync::Arc;
 
+use craft_ui::theme::SuiteDarkPalette;
 use egui::epaint::text::VariationCoords;
 use egui::{Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId, FontTweak, Stroke, TextStyle, Visuals};
 use serde::{Deserialize, Serialize};
@@ -94,26 +95,26 @@ impl Tokens {
     pub const DARK: Self = Self {
         dark: true,
         // ArtCraft's shared standard-dark role palette.
-        bg: hex(0x121316),
-        chrome: hex(0x0a0a0c),
-        panel: hex(0x101014),
-        raised: hex(0x1e1f22),
-        sunken: hex(0x060607),
-        hover: hex(0x323337),
-        pressed: hex(0x414246),
-        ink: hex(0xf2f1ee),
-        ink_strong: hex(0xffffff),
-        muted: hex(0xa6a6a8),
-        faint: hex(0x717176),
-        line: hex(0x36373a),
-        line_strong: hex(0x77787c),
-        accent: hex(0x2d81ff),
-        accent_ink: hex(0x74aaff),
-        on_accent: hex(0x060607),
-        selection: hex(0x203b65),
-        selection_ink: hex(0xf2f1ee),
-        invert_bg: hex(0xffffff),
-        invert_fg: hex(0x0b0b0c),
+        bg: SuiteDarkPalette::ARTCRAFT.window,
+        chrome: SuiteDarkPalette::ARTCRAFT.chrome,
+        panel: SuiteDarkPalette::ARTCRAFT.panel,
+        raised: SuiteDarkPalette::ARTCRAFT.raised,
+        sunken: SuiteDarkPalette::ARTCRAFT.input,
+        hover: SuiteDarkPalette::ARTCRAFT.hover,
+        pressed: SuiteDarkPalette::ARTCRAFT.pressed,
+        ink: SuiteDarkPalette::ARTCRAFT.text,
+        ink_strong: SuiteDarkPalette::ARTCRAFT.text_strong,
+        muted: SuiteDarkPalette::ARTCRAFT.text_secondary,
+        faint: SuiteDarkPalette::ARTCRAFT.text_disabled,
+        line: SuiteDarkPalette::ARTCRAFT.border,
+        line_strong: SuiteDarkPalette::ARTCRAFT.border_strong,
+        accent: SuiteDarkPalette::ARTCRAFT.accent,
+        accent_ink: SuiteDarkPalette::ARTCRAFT.focus,
+        on_accent: SuiteDarkPalette::ARTCRAFT.on_accent,
+        selection: SuiteDarkPalette::ARTCRAFT.selection,
+        selection_ink: SuiteDarkPalette::ARTCRAFT.selection_text,
+        invert_bg: SuiteDarkPalette::ARTCRAFT.primary,
+        invert_fg: SuiteDarkPalette::ARTCRAFT.on_primary,
         // PdfCraft's and LightCraft's inks, so status colours come from the site's palette.
         good: hex(0x3fd6b8),
         warn: hex(0xffc14d),
@@ -387,6 +388,48 @@ pub fn cjk_font_available(lang: Lang) -> bool {
 #[cfg(test)]
 mod dark_theme_tests {
     use super::*;
+
+    #[test]
+    fn shared_dark_roles_preserve_inverted_buttons_status_and_light_colors() {
+        let roles = SuiteDarkPalette::ARTCRAFT;
+        let dark = Tokens::DARK;
+        assert_eq!(dark.bg, roles.window);
+        assert_eq!(dark.chrome, roles.chrome);
+        assert_eq!(dark.panel, roles.panel);
+        assert_eq!(dark.raised, roles.raised);
+        assert_eq!(dark.sunken, roles.input);
+        assert_eq!(dark.hover, roles.hover);
+        assert_eq!(dark.pressed, roles.pressed);
+        assert_eq!(dark.ink, roles.text);
+        assert_eq!(dark.ink_strong, roles.text_strong);
+        assert_eq!(dark.muted, roles.text_secondary);
+        assert_eq!(dark.faint, roles.text_disabled);
+        assert_eq!(dark.line, roles.border);
+        assert_eq!(dark.line_strong, roles.border_strong);
+        assert_eq!(dark.accent, roles.accent);
+        assert_eq!(dark.accent_ink, roles.focus);
+        assert_eq!(dark.on_accent, roles.on_accent);
+        assert_eq!(dark.selection, roles.selection);
+        assert_eq!(dark.selection_ink, roles.selection_text);
+        assert_eq!(dark.invert_bg, roles.primary);
+        assert_eq!(dark.invert_fg, roles.on_primary);
+        assert_eq!((dark.good, dark.warn, dark.bad), (hex(0x3fd6b8), hex(0xffc14d), hex(0xff6259)));
+        let light = Tokens::LIGHT;
+        assert_eq!(light.bg, hex(0xf2f1ee));
+        assert_eq!(light.on_accent, Color32::WHITE);
+        assert_eq!(light.invert_bg, hex(0x101014));
+        assert_eq!(light.invert_fg, hex(0xf2f1ee));
+        assert_eq!(backdrop(), Color32::from_black_alpha(232));
+        let ctx = egui::Context::default();
+        apply(&ctx, ThemeChoice::System);
+        assert_eq!(ctx.options(|o| o.theme_preference), egui::ThemePreference::System);
+        assert_eq!(ctx.style_of(egui::Theme::Dark).visuals, visuals(&dark));
+        assert_eq!(ctx.style_of(egui::Theme::Light).visuals, visuals(&light));
+        for choice in ThemeChoice::ALL {
+            let json = serde_json::to_string(&choice).unwrap();
+            assert_eq!(serde_json::from_str::<ThemeChoice>(&json).unwrap(), choice);
+        }
+    }
 
     #[test]
     fn standard_dark_roles_reach_egui_without_changing_light_preference() {
